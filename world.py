@@ -3,12 +3,12 @@ from random import randint, shuffle
 
 class World(object):
 
-    def __init__(self, rows, columns, percentAlive=30):
+    def __init__(self, rows, columns):
 
         self.rows = rows
         self.columns = columns
-        self.cells = []
-        self.create_cells()
+        self.cells = self.create_cells()
+
 
     def __str__(self):
         string = ''
@@ -18,15 +18,17 @@ class World(object):
                 string += str(cell)
         return string
 
+
     def __len__(self):
         return self.rows * self.columns
 
     def create_cells(self):
-        self.cells = []
+        cells = []
         for row in range(self.rows):
-            self.cells.append([])
+            cells.append([])
             for column in range(self.columns):
-                self.cells[row].append(Cell(row, column))
+                cells[row].append(Cell(row, column))
+        return cells
 
     def populate_cells(self, percentAlive=30):
         """Makes a certain percentage of the cells in the world alive."""
@@ -36,7 +38,7 @@ class World(object):
                     cell.live()
 
     def better_populate_cells(self, percentAlive=30):
-        self.create_cells()
+        self.cells = self.create_cells()
         cellLocations = [(row, column) for row in range(self.rows) for column in range(self.columns)]
         shuffle(cellLocations)
         numberToLive = int( len(self) * (percentAlive/100) )
@@ -44,9 +46,19 @@ class World(object):
             row, column = cellLocations.pop()
             self.cells[row][column].live()
 
+    def neighbors(self, cell):
+        """Returns the number of living neighbors a cell has."""
+        neighbors = 0
+        for y in range(-1, 2):
+            for x in range(-1, 2):
+                neighbors +=  self.cells[cell.row+y][cell.column+x].alive
+        if self.cells[cell.row][cell.column].alive:
+            neighbors -= 1
+        return neighbors
 
 
-def test_world():
+
+def xtest_world():
     w = World(10, 10)
     print(w)
     w.populate_cells(10)
@@ -71,11 +83,26 @@ def test_world():
     w.better_populate_cells(50)
     print(w)
     w = World(24, 80)
-    for _ in range(500):
-        w.better_populate_cells(25)
-        print(w)
+    # for _ in range(500):
+    #     w.better_populate_cells(25)
+    #     print(w)
 
+def xtest_neighbors():
+    w = World(5, 5)
+    w.cells[1][2].live()
+    w.cells[2][2].live()
+    w.cells[3][2].live()
+    print(w)
+    assert w.neighbors(w.cells[1][1]) == 2
+    assert w.neighbors(w.cells[1][2]) == 1
+    assert w.neighbors(w.cells[1][3]) == 2
+    assert w.neighbors(w.cells[2][1]) == 3
+    assert w.neighbors(w.cells[2][2]) == 2
+    assert w.neighbors(w.cells[2][3]) == 3
+    assert w.neighbors(w.cells[3][1]) == 2
+    assert w.neighbors(w.cells[3][2]) == 1
+    assert w.neighbors(w.cells[3][3]) == 2
 
-
-if __name__ == '__main__':
-    test_world()
+    for row in range(1,4):
+        for column in range(1,4):
+            print(f'cells[{row}][{column}]: {w.neighbors(w.cells[row][column])} neighbors')

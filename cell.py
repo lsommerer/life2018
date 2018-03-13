@@ -1,30 +1,22 @@
 class Cell(object):
 
     def __init__(self, row, column):
-        self._alive = False
+        self.alive = False
         self.row = row
         self.column = column
+        self.liveChar = '\u26AB'
+        self.deadChar = '\u26AA'
 
     def __str__(self):
-        if self._alive:
-            return '\u26AB'
+        if self.alive:
+            return self.liveChar
         else:
-            return '\u26AA'
+            return self.deadChar
 
     def live(self):
-        self._alive = True
+        self.alive = True
+        return self
 
     def die(self):
-        self._alive = False
-
-
-def test_cell():
-    c = Cell(1,2)
-    print(c)
-    c.live()
-    print(c)
-    c.die()
-    print(c)
-
-if __name__ == '__main__':
-    test_cell()
+        self.alive = False
+        return self
