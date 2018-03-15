@@ -46,16 +46,6 @@ class World(object):
             row, column = cellLocations.pop()
             self.cells[row][column].live()
 
-    def neighbors(self, cell):
-        """Returns the number of living neighbors a cell has."""
-        neighbors = 0
-        for y in range(-1, 2):
-            for x in range(-1, 2):
-                neighbors +=  self.cells[cell.row+y][cell.column+x].alive
-        if self.cells[cell.row][cell.column].alive:
-            neighbors -= 1
-        return neighbors
-
 
 
 def xtest_world():
@@ -87,22 +77,3 @@ def xtest_world():
     #     w.better_populate_cells(25)
     #     print(w)
 
-def xtest_neighbors():
-    w = World(5, 5)
-    w.cells[1][2].live()
-    w.cells[2][2].live()
-    w.cells[3][2].live()
-    print(w)
-    assert w.neighbors(w.cells[1][1]) == 2
-    assert w.neighbors(w.cells[1][2]) == 1
-    assert w.neighbors(w.cells[1][3]) == 2
-    assert w.neighbors(w.cells[2][1]) == 3
-    assert w.neighbors(w.cells[2][2]) == 2
-    assert w.neighbors(w.cells[2][3]) == 3
-    assert w.neighbors(w.cells[3][1]) == 2
-    assert w.neighbors(w.cells[3][2]) == 1
-    assert w.neighbors(w.cells[3][3]) == 2
-
-    for row in range(1,4):
-        for column in range(1,4):
-            print(f'cells[{row}][{column}]: {w.neighbors(w.cells[row][column])} neighbors')
