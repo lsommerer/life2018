@@ -88,9 +88,6 @@ class Generation(object):
                 cell.neighbors.append(self._cells[neighborRow][neighborColumn])
 
 
-
-
-
     def count_living(self):
         countLiving = 0
         for cell in self.cells():
@@ -126,56 +123,3 @@ class Generation(object):
         for _ in range(numberToLive):
             row, column = cellLocations.pop()
             self._cells[row][column].live()
-
-
-
-
-
-def xtest_world():
-    w = Generation(10, 10)
-    print(w)
-    w.initial_populate_cells(10)
-    print(w)
-    w.initial_populate_cells(50)
-    print(w)
-    w.initial_populate_cells(100)
-    print(w)
-    w.initial_populate_cells(0)
-    print(w)
-    w = Generation(2, 8)
-    print(w)
-    w._cells[0][0].live()
-    print(w)
-    w._cells[1][7].live()
-    print(w)
-    w.initial_populate_cells(50)
-    print(w)
-    w.populate_cells(50)
-    print(w)
-    w = Generation(9, 3)
-    w.populate_cells(50)
-    print(w)
-    w = Generation(24, 80)
-    # for _ in range(500):
-    #     w.better_populate_cells(25)
-    #     print(w)
-
-def xtest_neighbors():
-    w = Generation(5, 5)
-    w._cells[1][2].live()
-    w._cells[2][2].live()
-    w._cells[3][2].live()
-    print(w)
-    assert w.neighbors(w._cells[1][1]) == 2
-    assert w.neighbors(w._cells[1][2]) == 1
-    assert w.neighbors(w._cells[1][3]) == 2
-    assert w.neighbors(w._cells[2][1]) == 3
-    assert w.neighbors(w._cells[2][2]) == 2
-    assert w.neighbors(w._cells[2][3]) == 3
-    assert w.neighbors(w._cells[3][1]) == 2
-    assert w.neighbors(w._cells[3][2]) == 1
-    assert w.neighbors(w._cells[3][3]) == 2
-
-    for row in range(1,4):
-        for column in range(1,4):
-            print(f'cells[{row}][{column}]: {w.neighbors(w.cells[row][column])} neighbors')

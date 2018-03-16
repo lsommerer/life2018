@@ -86,12 +86,93 @@ class MyTestCase(unittest.TestCase):
 
 
     def test_assign_neighbors(self):
-
-
-
-
-
-
+        rows = 3
+        columns = 3
+        g = Generation(rows, columns)
+        #
+        # Do we have the corredt number of neighbors?
+        #
+        correctNeighborCount = [3,5,3,
+                                5,8,5,
+                                3,5,3]
+        for index, cell in enumerate(g.cells()):
+            self.assertEqual(len(cell.neighbors), correctNeighborCount[index])
+        #
+        # Tediously test each cell
+        #
+        c = g._cells
+        #
+        #    x..
+        #    ...
+        #    ...
+        #
+        neighbors = g._cells[0][0].neighbors
+        correctNeighbors = [c[0][1], c[1][0], c[1][1]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[0][0]')
+        #
+        #    .x.
+        #    ...
+        #    ...
+        #
+        neighbors = g._cells[0][1].neighbors
+        correctNeighbors = [c[0][0], c[0][2], c[1][0], c[1][1], c[1][2]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[0][1]')
+        #
+        #    ..x
+        #    ...
+        #    ...
+        #
+        neighbors = g._cells[0][2].neighbors
+        correctNeighbors = [c[0][1], c[1][1], c[1][2]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[0][2]')
+        #
+        #    ...
+        #    x..
+        #    ...
+        #
+        neighbors = g._cells[1][0].neighbors
+        correctNeighbors = [c[0][0], c[0][1], c[1][1], c[2][0], c[2][1]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[1][0]')
+        #
+        #    ...
+        #    .x.
+        #    ...
+        #
+        neighbors = g._cells[1][1].neighbors
+        correctNeighbors = [c[0][0], c[0][1], c[0][2], c[1][0], c[1][2], c[2][0], c[2][1], c[2][2]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[1][1]')
+        #
+        #    ...
+        #    ..x
+        #    ...
+        #
+        neighbors = g._cells[1][2].neighbors
+        correctNeighbors = [c[0][1], c[0][2], c[1][1], c[2][1], c[2][2]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[1][2]')
+        #
+        #    ...
+        #    ...
+        #    x..
+        #
+        neighbors = g._cells[2][0].neighbors
+        correctNeighbors = [c[1][0], c[1][1], c[2][1]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[2][0]')
+        #
+        #    ...
+        #    ...
+        #    .x.
+        #
+        neighbors = g._cells[2][1].neighbors
+        correctNeighbors = [c[1][0], c[1][1], c[1][2], c[2][0], c[2][2]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[2][1]')
+        #
+        #    ...
+        #    ...
+        #    ..x
+        #
+        neighbors = g._cells[2][2].neighbors
+        correctNeighbors = [c[1][1], c[1][2], c[2][1]]
+        self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[2][2]')
 
 
 if __name__ == '__main__':
