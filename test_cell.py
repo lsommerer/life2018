@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import MagicMock
 from cell import Cell
 from generation import Generation
 
@@ -55,6 +56,25 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(cell.living_neighbors(),
                              correctCount[cell.row][cell.column],
                              f'cell[{row}][{column}] != {correctCount[row][column]}')
+
+    def test_next_state(self):
+        c = Cell(0,0)
+        c.die()
+        c.living_neighbors = MagicMock(side_effect=[0,1,2,3,4,5,6,7,8])
+        correctResults = [False, False, False, True, False, False, False, False, False]
+        for index, expectedResult in enumerate(correctResults):
+            nextState = c.next_state()
+            self.assertEqual(nextState, expectedResult,
+                             f'dead with {index} neighbors returned {nextState}.')
+
+        c.live()
+        c.living_neighbors = MagicMock(side_effect=[0,1,2,3,4,5,6,7,8])
+        correctResults = [False, False, True, True, False, False, False, False, False]
+        for index, expectedResult in enumerate(correctResults):
+            nextState = c.next_state()
+            self.assertEqual(nextState, expectedResult,
+                             f'dead with {index} neighbors returned {nextState}.')
+
 
 
 if __name__ == '__main__':

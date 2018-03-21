@@ -10,7 +10,6 @@ class Generation(object):
         self.create_cells()
         self.assign_neighbors()
 
-
     def __str__(self):
         string = ''
         for row in self._cells:
@@ -19,10 +18,8 @@ class Generation(object):
                 string += str(cell)
         return string
 
-
     def __len__(self):
         return self.rows * self.columns
-
 
     def create_cells(self):
         self._cells = []
@@ -36,13 +33,11 @@ class Generation(object):
             for cell in row:
                 yield cell
 
-
     def assign_neighbors(self):
         """
         Each cell has a list of all of it's neighbors. This is complicated by the fact that
         the cells on the edge of the world do not have as many neighbors as the cells in the
         middle of the world.
-        :return:
         """
         topRow = 0
         bottomRow = self.rows - 1
@@ -87,7 +82,6 @@ class Generation(object):
                 neighborColumn = cell.column + neighbor[1]
                 cell.neighbors.append(self._cells[neighborRow][neighborColumn])
 
-
     def count_living(self):
         countLiving = 0
         for cell in self.cells():
@@ -101,7 +95,7 @@ class Generation(object):
         a very good way to do this. You get about what you want for percentage, but not
         the actual amount. Look at populate_cells() for a better implementation.
         """
-        for row in self.cells():
+        for cell in self.cells():
             if randint(1, 101) <= percentAlive:
                 cell.live()
 
@@ -114,12 +108,50 @@ class Generation(object):
         :param percentAlive: Percentage of cells in this generation that will be changed to alive.
         :return:
         """
-        #TODO: Remove this error that exists to talk about debugging.
-#        self._cells = self.create_cells()
-        self.create_cells()
+        #TODO: Remove this error that I left so that we could talk about the debugger.
+        #
+        # Originally, I had init working just like below with a call to create_cells().
+        # That worked fine, and populate_cells() worked fine as well. But I changed
+        # create_cells() so that it took care of creating self._cells and didn't return
+        # anything. Then I didn't run my unit tests for some time, so I didn't know
+        # why I was getting an error in some unrelated function.
+        #
+        # Uncomment the line below and run the unit test to see the error. I had to become
+        # familiar with the pyCharm debugger to fix this, and so I think it will be a
+        # good intro to the pyCharm debugger.
+        #
+        #self._cells = self.create_cells()
         cellLocations = [(cell.row, cell.column) for cell in self.cells()]
         shuffle(cellLocations)
         numberToLive = int( len(self) * (percentAlive/100) )
         for _ in range(numberToLive):
             row, column = cellLocations.pop()
             self._cells[row][column].live()
+
+    def next_generation(self):
+        #TODO See if deepcopy is faster than creating a new generation
+        nextGeneration = Generation(self.rows, self.columns)
+        for cell in self.cells():
+            if cell.next_state():
+                nextGeneration._cells[cell.row][cell.column].live()
+        return nextGeneration
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

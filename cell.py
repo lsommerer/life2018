@@ -1,7 +1,22 @@
 class Cell(object):
 
-    liveChar = '\u26AB'
-    deadChar = '\u26AA'
+    displayCharacters = 'basic'
+
+    if displayCharacters  == 'circles':
+        liveChar = '\u26AB'
+        deadChar = '\u26AA'
+
+    if displayCharacters  == 'squares':
+        liveChar = '\u2B1B'
+        deadChar = '\u2B1C'
+
+    if displayCharacters  == 'soccer':
+        liveChar = '\u26BD'
+        deadChar = '\u2B1C'
+
+    if displayCharacters  == 'basic':
+        liveChar = 'O'
+        deadChar = '.'
 
     def __init__(self, row, column):
         self.alive = False
@@ -16,7 +31,11 @@ class Cell(object):
             return Cell.deadChar
 
     def __repr__(self):
-        return f'Cell[{self.row}][{self.column}]:{self.alive}'
+        if self.alive:
+            state = 'alive'
+        else:
+            state = 'dead'
+        return f'Cell[{self.row}][{self.column}]:{state}'
 
     def live(self):
         self.alive = True
@@ -33,3 +52,14 @@ class Cell(object):
             if neighbor.alive:
                 livingNeighbors += 1
         return livingNeighbors
+
+    def next_state(self):
+        neighbors = self.living_neighbors()
+        nextState = False
+        if self.alive:
+            if neighbors in [2, 3]:
+                nextState = True
+        else:
+            if neighbors == 3:
+                nextState = True
+        return nextState

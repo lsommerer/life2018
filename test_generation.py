@@ -89,8 +89,9 @@ class MyTestCase(unittest.TestCase):
         rows = 3
         columns = 3
         g = Generation(rows, columns)
+        g.populate_cells()
         #
-        # Do we have the corredt number of neighbors?
+        # Do we have the correct number of neighbors?
         #
         correctNeighborCount = [3,5,3,
                                 5,8,5,
@@ -106,7 +107,7 @@ class MyTestCase(unittest.TestCase):
         #    ...
         #    ...
         #
-        neighbors = g._cells[0][0].neighbors
+        neighbors = c[0][0].neighbors
         correctNeighbors = [c[0][1], c[1][0], c[1][1]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[0][0]')
         #
@@ -114,7 +115,7 @@ class MyTestCase(unittest.TestCase):
         #    ...
         #    ...
         #
-        neighbors = g._cells[0][1].neighbors
+        neighbors = c[0][1].neighbors
         correctNeighbors = [c[0][0], c[0][2], c[1][0], c[1][1], c[1][2]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[0][1]')
         #
@@ -122,7 +123,7 @@ class MyTestCase(unittest.TestCase):
         #    ...
         #    ...
         #
-        neighbors = g._cells[0][2].neighbors
+        neighbors = c[0][2].neighbors
         correctNeighbors = [c[0][1], c[1][1], c[1][2]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[0][2]')
         #
@@ -130,7 +131,7 @@ class MyTestCase(unittest.TestCase):
         #    x..
         #    ...
         #
-        neighbors = g._cells[1][0].neighbors
+        neighbors = c[1][0].neighbors
         correctNeighbors = [c[0][0], c[0][1], c[1][1], c[2][0], c[2][1]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[1][0]')
         #
@@ -138,7 +139,7 @@ class MyTestCase(unittest.TestCase):
         #    .x.
         #    ...
         #
-        neighbors = g._cells[1][1].neighbors
+        neighbors = c[1][1].neighbors
         correctNeighbors = [c[0][0], c[0][1], c[0][2], c[1][0], c[1][2], c[2][0], c[2][1], c[2][2]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[1][1]')
         #
@@ -146,7 +147,7 @@ class MyTestCase(unittest.TestCase):
         #    ..x
         #    ...
         #
-        neighbors = g._cells[1][2].neighbors
+        neighbors = c[1][2].neighbors
         correctNeighbors = [c[0][1], c[0][2], c[1][1], c[2][1], c[2][2]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[1][2]')
         #
@@ -154,7 +155,7 @@ class MyTestCase(unittest.TestCase):
         #    ...
         #    x..
         #
-        neighbors = g._cells[2][0].neighbors
+        neighbors = c[2][0].neighbors
         correctNeighbors = [c[1][0], c[1][1], c[2][1]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[2][0]')
         #
@@ -162,7 +163,7 @@ class MyTestCase(unittest.TestCase):
         #    ...
         #    .x.
         #
-        neighbors = g._cells[2][1].neighbors
+        neighbors = c[2][1].neighbors
         correctNeighbors = [c[1][0], c[1][1], c[1][2], c[2][0], c[2][2]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[2][1]')
         #
@@ -170,9 +171,53 @@ class MyTestCase(unittest.TestCase):
         #    ...
         #    ..x
         #
-        neighbors = g._cells[2][2].neighbors
+        neighbors = c[2][2].neighbors
         correctNeighbors = [c[1][1], c[1][2], c[2][1]]
         self.assertEqual(set(neighbors), set(correctNeighbors), 'error at c[2][2]')
+
+
+    def test_next_generation_blinker(self):
+        l = Cell.liveChar
+        d = Cell.deadChar
+        n = '\n'
+        state1 = n + d + l + d + \
+                 n + d + l + d + \
+                 n + d + l + d
+
+        state2 = n + d + d + d + \
+                 n + l + l + l + \
+                 n + d + d + d
+
+        g = Generation(3, 3)
+        g._cells[0][1].live()
+        g._cells[1][1].live()
+        g._cells[2][1].live()
+
+        self.assertEqual(state1, str(g))
+        g = g.next_generation()
+        self.assertEqual(state2, str(g))
+        g = g.next_generation()
+        self.assertEqual(state1, str(g))
+
+
+    def test_next_generation_block(self):
+        l = Cell.liveChar
+        d = Cell.deadChar
+        n = '\n'
+        state1 = n + l + l + \
+                 n + l + l
+
+        g = Generation(2, 2)
+        g._cells[0][0].live()
+        g._cells[0][1].live()
+        g._cells[1][0].live()
+        g._cells[1][1].live()
+
+        self.assertEqual(state1, str(g))
+        g = g.next_generation()
+        self.assertEqual(state1, str(g))
+        g = g.next_generation()
+        self.assertEqual(state1, str(g))
 
 
 if __name__ == '__main__':
