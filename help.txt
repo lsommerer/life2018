@@ -1,0 +1,34 @@
+     ************************************************************************************************
+     **                                                                                            **
+     **                          **       **   ******   ******                                     **
+     **                          **       **   ******   ******                                     **
+     **                          **       **   **       **                                         **
+     **                          **       **   ****     ****                                       **
+     **                          **       **   ****     ****                                       **
+     **                          **       **   **       **                                         **
+     **                          ******   **   **       ******                                     **
+     **                          ******   **   **       ******  Version 0.4                        **
+     **                                                                                            **
+     **     This program implements John Conway's popular cellular automaton called 'life'.        **
+     **     Each cell can have 8 neighboring cells. The state of a cell in the next generation     **
+     **     is determined by the number of neighbors that cell has:                                **
+     **                                                                                            **
+     **          0 to 1 neighbors dies of loneliness                                               **
+     **          2 to 3 neighbors lives comfortably                                                **
+     **          4 to 8 neighbors dies of over crowding                                            **
+     **          exactly 3 neighbors a new cell is generated                                       **
+     **                                                                                            **
+     **     You can use the following commands:                                                    **
+     **                                                                                            **
+     **          Create   [C]: creates a new world with random cells: C[size as rowsxcolumns]      **
+     **          Next     [N]: displays the next X generation of cell life: N[howfar]              **
+     **          Skip     [K]: skips ahead X generations: K[howfar]                                **
+     **          Save     [S]: saves the current world: S[filename]                                **
+     **          Open     [O]: opens a world that was previously saved: O[filename]                **
+     **          Library  [L]: Pick from a list of interesting worlds: L[filename|number]          **
+     **          Help     [H]: displays this help screen: H|?                                      **
+     **          Quit     [Q]: quits the program: Q                                                **
+     **          More     [M]: more options to customize the program                               **
+     **                                                                                            **
+     **    Most commands also take parameters. For example N20 shows the next 20 generations.      **
+     ************************************************************************************************

@@ -19,6 +19,19 @@ class Menu(object):
 
         menuItems = [[command, display, validLetters, parameterType, isDefault], ...]
 
+        for example:
+
+        mainMenu = [['create',      '[C]reate',    'Cc',   'integer2', False],
+                    ['next',        '[N]ext',      'Nn',   'integer1', True],
+                    ['skip',        's[K]ip',      'Kk',   'integer1', False],
+                    ['save',        '[S]ave',      'Ss',   'string1',  False],
+                    ['open',        '[O]pen',      'Oo',   'string1',  False],
+                    ['population',  '[P]opulaion', 'Pp',   'integer1', False],
+                    ['size',        's[I]ze',      'Ii',   'integer2', False],
+                    ['long l',      '[L]ong L',    'Ll',   'integer2', False],
+                    ['help',        '[H]elp',      'Hh?',   None,      False],
+                    ['quit',        '[Q]uit',      'Qq',    None,      False]]
+
         command: a string description of the command: 'help'
         display: what the menu displays for the command: '[H]elp'
         validLetters: the letters that resolve to this command: 'Hh?'
@@ -38,7 +51,8 @@ class Menu(object):
     def __str__(self):
         menuString = ''
         for menuItem in self.menuItems:
-            menuString += menuItem[Menu.displayAs] + Menu.separator
+            if menuItem[Menu.displayAs] != '':
+               menuString += menuItem[Menu.displayAs] + Menu.separator
         #
         # Take off the last Menu.separator
         #
@@ -101,6 +115,10 @@ class Menu(object):
                 numbers = numbers.split(' ')
                 if is_integer(numbers[0]) and is_integer(numbers[1]):
                     parameter = [int(numbers[0]), int(numbers[1])]
+        elif parameterType is None:
+            pass
+        else:
+            raise TypeError(f'parameterType "{parameterType}" is not defined.')
         return parameter
 
     def display(self):

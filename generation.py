@@ -3,6 +3,9 @@ from random import randint, shuffle
 
 class Generation(object):
 
+    deadASCII = '.'
+    aliveASCII = 'x'
+
     def __init__(self, rows, columns):
 
         self.rows = rows
@@ -136,7 +139,22 @@ class Generation(object):
                 nextGeneration._cells[cell.row][cell.column].live()
         return nextGeneration
 
-
+    def as_text(self, alive='x', dead='.'):
+        """
+        Returns the generation as a text string
+        :param alive: Character to use for the alive cells
+        :param dead: Character to use for the dead cells
+        :return: A string suitable for saving to a text file.
+        """
+        string = ''
+        for row in self._cells:
+            string += '\n'
+            for cell in row:
+                if cell.alive:
+                    string += Generation.aliveASCII
+                else:
+                    string += Generation.deadASCII
+        return string
 
 
 
