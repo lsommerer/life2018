@@ -39,15 +39,20 @@ class Simulation(object):
     def __str__(self):
         return str(self.generation)
 
+    def intro(self):
+        self.open('intro.life', './library')
+        sleep(1)
+        self.next(50)
+        self.help('help.txt')
+
     def run(self):
         """Main event loop for the simulation."""
-        print(self)
-        command = 'help'
-        parameter = None
+        command = 'do not quite the first time'
         while command != 'quit':
-            if command == 'help':
-                self.help('help.txt')
-            elif command == 'create':
+            self.mainMenu.display()
+            command = self.mainMenu.command
+            parameter = self.mainMenu.parameter
+            if command == 'create':
                 self.create_world(parameter)
             elif command == 'next':
                 self.next(parameter)
@@ -59,18 +64,19 @@ class Simulation(object):
                 self.open(parameter, Simulation.defaultDirectory)
             elif command == 'library':
                 self.open(parameter, Simulation.libraryDirectory)
-            elif command == 'more':
-                command, parameter = self.more()
-            if command == 'back':
-                print(self)
-            if command == 'population':
+            elif command == 'population':
                 self.change_population_rate(parameter)
-            if command == 'size':
+            elif command == 'size':
                 self.change_world_size(parameter)
-            if command != 'quit':
-                self.mainMenu.display()
-                command = self.mainMenu.command
-                parameter = self.mainMenu.parameter
+            elif command == 'more':
+                self.more()
+            elif command == 'help':
+                self.help('help.txt')
+            elif command == 'quit':
+                print('goodbye.')
+            else:
+                raise TypeError(f'command: {command} parameter:{parameter} not supported.')
+
 
     def more(self):
         """
@@ -81,8 +87,14 @@ class Simulation(object):
         self.moreMenu.display()
         command = self.moreMenu.command
         parameter = self.moreMenu.parameter
-        return command, parameter
-
+        if command == 'more help':
+            command, parameter = self.more_help()
+        if command == 'back':
+            print(self)
+        if command == 'population':
+            self.change_population_rate(parameter)
+        if command == 'size':
+            self.change_world_size(parameter)
 
     def create_world(self, size=None):
         """
@@ -130,6 +142,7 @@ class Simulation(object):
         """
         if percentAlive == None:
             percentAlive = get_integer('What percent should be alive?')
+        self.generation = Generation(self.generation.rows, self.generation.columns)
         self.generation.populate_cells(percentAlive)
         self.initialPercentAlive = percentAlive
         print(self)
@@ -205,7 +218,7 @@ class Simulation(object):
         """
         filename = self.get_filename_for_opening(filename, myPath)
         #
-        # fix_filename_open will return '' if there are no files available
+        # get_filename_for_opening return '' if there are no files available
         #
         if filename == '':
             print('404 -No files found. Try saving one first.')
@@ -261,40 +274,6 @@ class Simulation(object):
             filename = ''
         return filename
 
-
-    def create_long_l_world(self, size=None):
-        """
-        Create a world with cells living that look like a "long L"
-        :param size: [optional] list containing the number of rows and columns
-        :return: None
-        """
-        if size == None:
-            size = [self.generation.rows, self.generation.columns]
-        #
-        # There is a minimum size for a Long L world.
-        #
-        if size[0] < 6: size[0] = 6
-        if size[1] < 4: size[1] = 4
-        self.generation = Generation(size[0], size[1])
-        #
-        # Start the Long L in roughly the center of the screen.
-        #
-        startRow = int(size[0]/2)-2
-        startColumn = int(size[1]/2)-1
-        #....
-        #.O..
-        #.O..
-        #.O..
-        #.OO.
-        #....
-        self.generation._cells[startRow][startColumn].live()
-        self.generation._cells[startRow+1][startColumn].live()
-        self.generation._cells[startRow+2][startColumn].live()
-        self.generation._cells[startRow+3][startColumn].live()
-        self.generation._cells[startRow+3][startColumn+1].live()
-        print(self)
-
-
     def help(self, filename):
         """prints instructions on the screen"""
         file = open(filename, 'r')
@@ -302,9 +281,17 @@ class Simulation(object):
         file.close()
         print(instructions)
 
+    def more_help(self):
+        self.help('morehelp.txt')
+        self.moreMenu.display()
+        command = self.moreMenu.command
+        parameter = self.moreMenu.parameter
+        return command, parameter
+
 
 def main():
-    s = Simulation(34, 72)
+    s = Simulation(34, 72) #115 238 on 4k monitor
+    s.intro()
     s.run()
 
 if __name__ == '__main__':

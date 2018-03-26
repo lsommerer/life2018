@@ -20,15 +20,15 @@
      **                                                                                            **
      **     You can use the following commands:                                                    **
      **                                                                                            **
-     **          Create   [C]: creates a new world with random cells: C[size as rowsxcolumns]      **
-     **          Next     [N]: displays the next X generation of cell life: N[howfar]              **
-     **          Skip     [K]: skips ahead X generations: K[howfar]                                **
-     **          Save     [S]: saves the current world: S[filename]                                **
-     **          Open     [O]: opens a world that was previously saved: O[filename]                **
-     **          Library  [L]: Pick from a list of interesting worlds: L[filename]          **
-     **          Help     [H]: displays this help screen: H|?                                      **
-     **          Quit     [Q]: quits the program: Q                                                **
-     **          More     [M]: more options to customize the program                               **
+     **          Population [P]: change the population rate: P[percent]                            **
+     **          Size       [I]: change the world size: I [rows columns]                           **
+     **          More Help  [H]: this screen: H|?                                                  **
+     **          Back       [B]: go back to the main menu                                          **
      **                                                                                            **
-     **    Most commands also take parameters. For example N20 shows the next 20 generations.      **
+     **                                                                                            **
+     **                                                                                            **
+     **                                                                                            **
+     **                                                                                            **
+     **                                                                                            **
+     **    Most commands also take parameters. For example P20 makes 20% of the cells alive.       **
      ************************************************************************************************
