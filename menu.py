@@ -112,17 +112,9 @@ class Menu(object):
         if len(userInput) == 0:
             userInput = self.default()
         while (userInput == None) or (not self.valid(userInput[0])):
-            userInput = input(f"please enter one of: '{self.valid_letters()}'")
+            userInput = input(f"Please chose a valid option from the menu above:")
             if len(userInput) == 0:
                 userInput = self.default()
         self.userInput = userInput
         self.command = self.parse_command()
         self.parameter = self.parse_parameter()
-
-
-
-
-
-
-
-
