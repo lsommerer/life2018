@@ -107,14 +107,11 @@ class Menu(object):
                 parameter = int(number)
         elif parameterType == 'integer2':
             numbers = self.userInput[1:].strip()
-            if 'x' in numbers:
-                numbers = numbers.split('x')
-                if is_integer(numbers[0]) and is_integer(numbers[1]):
-                    parameter = [int(numbers[0]), int(numbers[1])]
-            elif ' ' in numbers:
-                numbers = numbers.split(' ')
-                if is_integer(numbers[0]) and is_integer(numbers[1]):
-                    parameter = [int(numbers[0]), int(numbers[1])]
+            for separator in 'x,- ':
+                if separator in numbers:
+                    numbers = numbers.split(separator)
+                    if is_integer(numbers[0]) and is_integer(numbers[1]):
+                        parameter = [int(numbers[0]), int(numbers[1])]
         elif parameterType is None:
             pass
         else:
