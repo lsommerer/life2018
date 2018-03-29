@@ -1,13 +1,12 @@
 from generation import Generation
 from menu import Menu
-from toolbox import get_integer, get_string, get_boolean
+from toolbox import get_integer, get_string, get_boolean, is_integer
 from time import sleep
 from os import listdir, path, mkdir
 
-
 class Simulation(object):
 
-    delay = 0.1
+    delay = 0.0
     defaultDirectory = './worlds/'
     libraryDirectory = './library/'
 
@@ -21,28 +20,71 @@ class Simulation(object):
                 ['help',        '[H]elp',      'Hh?',   None,      False],
                 ['quit',        '[Q]uit',      'Qq',    None,      False],
                 ['population',  '',            'Pp',   'integer1', False],
+                ['geometry',    '',            'Gg',    None,      False],
+                ['rule change', '',            'Rr',   'integer2',  False],
                 ['size',        '',            'Ii',   'integer2', False]]
 
     moreMenu = [['population',  '[P]opulaion', 'Pp',   'integer1', False],
                 ['size',        's[I]ze',      'Ii',   'integer2', False],
+                ['geometry',    '[G]eometry',  'Gg',    None,      False],
+                ['rule change', '[R]ules',     'Rr',   'integer2',  False],
                 ['more help',   '[H]elp',      'Hh?',   None,      False],
                 ['back',        '[B]ack',      'Bb',    None,      True]]
 
 
-    def __init__(self, rows=5, columns=5, percentAlive=50):
+    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish'):
         self.initialPercentAlive = percentAlive
-        self.generation = Generation(rows, columns)
+        self.geometry = geometry
+        self.rules = [[2,3],[3]]
+        self.generation = Generation(rows, columns, self.geometry)
         self.generation.populate_cells(percentAlive)
         self.mainMenu = Menu(Simulation.mainMenu)
         self.moreMenu = Menu(Simulation.moreMenu)
+        self.generationCount = 0
+        self.percentAlive = percentAlive
+        self.name = 'untitled world'
+        self.message = 'Welcome to LIFE!'
 
     def __str__(self):
-        return str(self.generation)
+        return str(self.generation) + self.status_bar()
+
+    def status_bar(self):
+        bar = '\n'
+        bar += f'world:{self.name}  '
+        bar += f'rules: {self.rule_string()}  '
+        bar += f'geometry:{self.geometry}  '
+        bar += f'size:{self.generation.rows}x{self.generation.columns}  '
+        bar += f'generations:{self.generationCount}  '
+        bar += f'living:{int(self.generation.count_living()/len(self.generation._cells)+1)}%  '
+        if self.message:
+            bar += f'    *{self.message}*'
+        return bar
+
+    def rule_string(self):
+        ruleString = ''
+        for rule in self.rules:
+            if len(rule) == 1:
+                more =  str(rule[0])
+            else:
+                more = ''.join([str(number) for number in rule])
+            ruleString += more + '/'
+        ruleString = ruleString[:-1] + ''
+        return ruleString
 
     def intro(self):
         self.open('intro.life', './library')
         sleep(1)
-        self.next(50)
+        temp = Simulation.delay
+        Simulation.delay = 1.6
+        self.next(2)
+        Simulation.delay = 0.8
+        self.next(4)
+        Simulation.delay = 0.4
+        self.next(8)
+        Simulation.delay = 0.2
+        self.next(24)
+        sleep(1)
+        Simulation.delay = temp
         self.help('help.txt')
 
     def run(self):
@@ -68,6 +110,10 @@ class Simulation(object):
                 self.change_population_rate(parameter)
             elif command == 'size':
                 self.change_world_size(parameter)
+            elif command == 'geometry':
+                self.toggle_geometry()
+            elif command == 'rule change':
+                self.rule_change(parameter)
             elif command == 'more':
                 self.more()
             elif command == 'help':
@@ -75,8 +121,7 @@ class Simulation(object):
             elif command == 'quit':
                 print('goodbye.')
             else:
-                raise TypeError(f'command: {command} parameter:{parameter} not supported.')
-
+                raise TypeError(f"command:'{command}' parameter:'{parameter}' not supported.")
 
     def more(self):
         """
@@ -89,12 +134,18 @@ class Simulation(object):
         parameter = self.moreMenu.parameter
         if command == 'more help':
             command, parameter = self.more_help()
-        if command == 'back':
+        elif command == 'back':
             print(self)
-        if command == 'population':
+        elif command == 'population':
             self.change_population_rate(parameter)
-        if command == 'size':
+        elif command == 'geometry':
+            self.toggle_geometry()
+        elif command == 'size':
             self.change_world_size(parameter)
+        elif command == 'rule change':
+            self.rule_change(parameter)
+        else:
+            raise TypeError(f"command:'{command}' parameter:'{parameter}' not supported.")
 
     def create_world(self, size=None):
         """
@@ -104,8 +155,10 @@ class Simulation(object):
         """
         if size == None:
             size = [self.generation.rows, self.generation.columns]
-        self.generation = Generation(size[0], size[1])
+        self.generation = Generation(size[0], size[1], self.geometry, self.rules)
         self.generation.populate_cells(self.initialPercentAlive)
+        self.message = 'a whole new world'
+        self.name = 'untitled world'
         print(self)
 
     def next(self, generations=None):
@@ -116,10 +169,15 @@ class Simulation(object):
         """
         if generations == None:
             generations = 1
-        for _ in range(generations):
+        start = generations-1
+        for current in range(generations):
             self.generation = self.generation.next_generation()
             print(self)
             sleep(Simulation.delay)
+            self.generationCount += 1
+            self.message = f' left: {start - current} '
+        self.message = ''
+        print(self)
 
     def skip_forward(self, generations=None):
         """
@@ -132,6 +190,8 @@ class Simulation(object):
             generations = get_integer('How many generations?')
         for _ in range(generations):
             self.generation = self.generation.next_generation()
+        self.message = f'skipped forward {generations} generations'
+        self.generationCount += generations
         print(self)
 
     def change_population_rate(self, percentAlive=None):
@@ -142,9 +202,11 @@ class Simulation(object):
         """
         if percentAlive == None:
             percentAlive = get_integer('What percent should be alive?')
-        self.generation = Generation(self.generation.rows, self.generation.columns)
+        self.generation = Generation(self.generation.rows, self.generation.columns, self.geometry, self.rules)
         self.generation.populate_cells(percentAlive)
         self.initialPercentAlive = percentAlive
+        self.message = 'world population changed'
+        self.generationCount = 0
         print(self)
 
     def change_world_size(self, size=None):
@@ -160,8 +222,34 @@ class Simulation(object):
         else:
             rows = size[0]
             columns = size[1]
-        self.generation = Generation(rows, columns)
+        self.generation = Generation(rows, columns, self.geometry, self.rules)
         self.generation.populate_cells(self.initialPercentAlive)
+        self.message = 'world size changed'
+        self.generationCount = 0
+        print(self)
+
+    def rule_change(self, newRules=None):
+        """
+        Change the rules for the simulation.
+        :param newRules: string with two integers separated by a space:
+                         integer1: number of neighbors where a cell continues living
+                         integer2: number of neighbors where a dead cell comes alive
+
+                         The default rules are: '23 3'
+        :return:
+        """
+        if newRules is None:
+            self.help('rules.txt')
+            remainAlive = get_integer('Cells remaing alive with this many neighbors:')
+            generate =  get_integer('Cells become alive with this many neighbors :')
+        else:
+            remainAlive = newRules[0]
+            generate = newRules[1]
+        remainAlive = [int(number) for number in str(remainAlive)]
+        generate = [int(number) for number in str(generate)]
+        self.rules = [remainAlive, generate]
+        self.generation.rules = self.rules
+        self.message = 'The rules have changed'
         print(self)
 
     def save(self, filename='', myPath='./'):
@@ -176,6 +264,9 @@ class Simulation(object):
         myFile = open(filename, 'w')
         myFile.write(text)
         myFile.close()
+        self.name = filename.split('.')[1].split('/')[2]
+        self.message = f'saved {self.name}'
+        print(self)
 
     def get_filename_for_saving(self, filename, myPath='./'):
         """
@@ -221,7 +312,7 @@ class Simulation(object):
         # get_filename_for_opening return '' if there are no files available
         #
         if filename == '':
-            print('404 -No files found. Try saving one first.')
+            self.message = '404 -No files found. Try saving one first.'
         else:
             myFile = open(filename, 'r')
             textGeneration = myFile.read()
@@ -229,10 +320,17 @@ class Simulation(object):
             textGeneration = textGeneration.split('\n')[1:]
             rows = len(textGeneration)
             columns = len(textGeneration[0])
-            self.generation = Generation(rows, columns)
+            self.generation = Generation(rows, columns, self.geometry, self.rules)
             for cell in self.generation.cells():
                 if textGeneration[cell.row][cell.column] != Generation.deadASCII:
                     cell.live()
+            if self.geometry == 'dish':
+                self.generation.assign_neighbors_torus()
+            else:
+                self.generation.assign_neighbors_dish()
+            self.name = filename.split('.')[1].split('/')[2]
+            self.message = f'opened {self.name}'
+            self.generationCount = 0
             print(self)
 
     def get_filename_for_opening(self, filename, myPath='./'):
@@ -274,6 +372,17 @@ class Simulation(object):
             filename = ''
         return filename
 
+    def toggle_geometry(self):
+        if self.geometry == 'dish':
+            self.geometry = 'torus'
+            self.generation.assign_neighbors_torus()
+            self.message = 'The world wraps around like a donut.'
+        else:
+            self.geometry = 'dish'
+            self.generation.assign_neighbors_dish()
+            self.message = 'The world ends at the edges.'
+        print(self)
+
     def help(self, filename):
         """prints instructions on the screen"""
         file = open(filename, 'r')
@@ -290,9 +399,27 @@ class Simulation(object):
 
 
 def main():
-    s = Simulation(34, 72) #115 238 on 4k monitor
+    s = Simulation(115, 238) #115 238 on 4k monitor   84 156 on small screen 7pt font
     s.intro()
     s.run()
 
+def speed_test():
+    s = Simulation(34, 72)
+    s.delay = 0
+    s.toggle_geometry()
+    s.create_world()
+    s.next(200)
+    s.create_world()
+    s.next(200)
+    s.create_world()
+    s.next(200)
+    s.create_world()
+    s.next(200)
+    s.create_world()
+    s.next(200)
+
+
+
 if __name__ == '__main__':
     main()
+    #speed_test()

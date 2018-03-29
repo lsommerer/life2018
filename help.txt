@@ -25,7 +25,7 @@
      **          Skip     [K]: skips ahead X generations: K[howfar]                                **
      **          Save     [S]: saves the current world: S[filename]                                **
      **          Open     [O]: opens a world that was previously saved: O[filename]                **
-     **          Library  [L]: Pick from a list of interesting worlds: L[filename]          **
+     **          Library  [L]: Pick from a list of interesting worlds: L[filename]                 **
      **          Help     [H]: displays this help screen: H|?                                      **
      **          Quit     [Q]: quits the program: Q                                                **
      **          More     [M]: more options to customize the program                               **

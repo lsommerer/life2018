@@ -53,13 +53,13 @@ class Cell(object):
                 livingNeighbors += 1
         return livingNeighbors
 
-    def next_state(self):
+    def next_state(self, rules):
         neighbors = self.living_neighbors()
         nextState = False
         if self.alive:
-            if neighbors in [2, 3]:
+            if neighbors in rules[0]:
                 nextState = True
         else:
-            if neighbors == 3:
+            if neighbors in rules[1]:
                 nextState = True
         return nextState

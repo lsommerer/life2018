@@ -1,0 +1,35 @@
+****************************************************************************************************
+****************************************************************************************************
+**                                                                                                **
+**                           **      **  ******  ******                                           **
+**                           **      **  ******  ******                                           **
+**                           **      **  **      **                                               **
+**                           **      **  ****    ****                                             **
+**                           **      **  ****    ****                                             **
+**                           **      **  **      **                                               **
+**                           ******  **  **      ******                                           **
+**                           ******  **  **      ******  Rules                                    **
+**                                                                                                **
+**          Rules for the game of life are given in two sections. The                             **
+**          first section says how many neighbors a live cell must have                           **
+**          to stay alive. The second section says how many neighbors                             **
+**          a dead cell must have to become alive.                                                **
+**                                                                                                **
+**          The initial rules of the game are:                                                    **
+**                                                                                                **
+**           0-1 neighbors: the cell dies of lonelyness                                           **
+**           2-3 neighbors: the cell lives                                                        **
+**           4-8 neighbors: the cell dies of overcrowding                                         **
+**             3 neighbors exactly : a new cell is born                                           **
+**                                                                                                **
+**          This would be entered like this:                                                      **
+**                                                                                                **
+**          cells remain alive with this many neighbors: 23                                       **
+**          cells become alive with this many neighbors : 3                                       **
+**                                                                                                **
+**          That means that cells that are currently alive and that have                          **
+**          2 or 3 neighbors will remain alive and that cells that are                            **
+**          currently dead and have 3 neighbors will become alive.                                **
+**                                                                                                **
+****************************************************************************************************
+****************************************************************************************************

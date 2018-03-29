@@ -107,7 +107,7 @@ class Menu(object):
                 parameter = int(number)
         elif parameterType == 'integer2':
             numbers = self.userInput[1:].strip()
-            for separator in 'x,- ':
+            for separator in 'x,-/ ':
                 if separator in numbers:
                     numbers = numbers.split(separator)
                     if is_integer(numbers[0]) and is_integer(numbers[1]):
@@ -119,7 +119,7 @@ class Menu(object):
         return parameter
 
     def display(self):
-        print(str(self)+'  ', end = '')
+        print(f'{self}', end = '  ')
         userInput = input()
         #
         # The user might return the emply string.

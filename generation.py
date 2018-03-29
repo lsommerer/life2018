@@ -1,17 +1,23 @@
 from cell import Cell
 from random import randint, shuffle
+from copy import deepcopy
 
 class Generation(object):
 
     deadASCII = '.'
     aliveASCII = 'x'
 
-    def __init__(self, rows, columns):
+    def __init__(self, rows, columns, geometry='dish', rules=[[2,3],[3]]):
 
         self.rows = rows
         self.columns = columns
         self.create_cells()
-        self.assign_neighbors()
+        self.geometry = geometry
+        self.rules = rules
+        if self.geometry == 'dish':
+            self.assign_neighbors_dish()
+        else:
+            self.assign_neighbors_torus()
 
     def __str__(self):
         string = ''
@@ -36,7 +42,7 @@ class Generation(object):
             for cell in row:
                 yield cell
 
-    def assign_neighbors(self):
+    def assign_neighbors_dish(self):
         """
         Each cell has a list of all of it's neighbors. This is complicated by the fact that
         the cells on the edge of the world do not have as many neighbors as the cells in the
@@ -80,10 +86,101 @@ class Generation(object):
             #
             # Add the remaining neighbors to the cell's list of neighbors
             #
+            cell.neighbors = []
             for neighbor in neighbors:
-                neighborRow = cell.row + neighbor[0]
-                neighborColumn = cell.column + neighbor[1]
+                neighborRow = (cell.row + neighbor[0])
+                neighborColumn = (cell.column + neighbor[1])
                 cell.neighbors.append(self._cells[neighborRow][neighborColumn])
+
+    def assign_neighbors_torus(self):
+        """
+        Find each cell's neighbors and store them in a list to use when computing the next generations.
+        """
+        for cell in self.cells():
+            #
+            # The neighbor's relative coordinates
+            #
+            neighbors = [(-1,-1), (-1, 0), (-1, 1),
+                         (0, -1),          (0, 1),
+                         (1, -1), (1, 0),  (1, 1)]
+
+            #
+            # There is not a problem when the indicies are too small. A negative index is fine
+            # in Python and actually wraps around to the other end of the list, which is what
+            # we want.
+            #
+            # But there is a problem with adding 1 onto the end of the list, so after we find
+            # the row, we mod it by the length of the row. if the list has 10 rows, list[9] is
+            # fine, but list[10] causes an index out of range error. list[10 mod 10] is equal
+            # to list[0] which is where we want to be in the list anyway.
+            #
+            cell.neighbors = []
+            for neighbor in neighbors:
+                neighborRow = (cell.row + neighbor[0]) % self.rows
+                neighborColumn = (cell.column + neighbor[1]) % self.columns
+                cell.neighbors.append(self._cells[neighborRow][neighborColumn])
+
+    def assign_neighbors_torus2(self):
+        """
+        Find each cell's neighbors and store them in a list to use when computing the next generations.
+        """
+        for cell in self.cells():
+            #
+            # The neighbor's relative coordinates
+            #
+            neighbors = [(-1,-1), (-1, 0), (-1, 1),
+                         (0, -1),          (0, 1),
+                         (1, -1), (1, 0),  (1, 1)]
+
+            #
+            # There is not a problem when the indicies are too small. A negative index is fine
+            # in Python and actually wraps around to the other end of the list, which is what
+            # we want.
+            #
+            # But there is a problem with adding 1 onto the end of the list, so after we find
+            # the row. so we test for those conditions. I am doing this to see if there is a
+            # difference in speed. This turns our to be about 10% slower than mod.
+            #
+            cell.neighbors = []
+            for neighbor in neighbors:
+                neighborRow = (cell.row + neighbor[0])
+                neighborColumn = (cell.column + neighbor[1])
+                if neighborRow == self.rows: neighborRow = 0
+                if neighborColumn == self.columns: neighborColumn = 0
+                cell.neighbors.append(self._cells[neighborRow][neighborColumn])
+
+    def assign_neighbors_torus3(self):
+        """
+        Find each cell's neighbors and store them in a list ot use when computing the next generations.
+        """
+        for cell in self.cells():
+            #
+            # The neighbor's relative coordinates
+            #
+            neighbors = [(-1,-1), (-1, 0), (-1, 1),
+                         (0, -1),          (0, 1),
+                         (1, -1), (1, 0),  (1, 1)]
+
+            #
+            # There is not a problem when the indicies are too small. A negative index is fine
+            # in Python and actually wraps around to the other end of the list, which is what
+            # we want.
+            #
+            # But there is a problem with adding 1 onto the end of the list, so after we find
+            # the row. I'm experimenting with the speed of using a try...except block instead of
+            # the mod function above. This method is about 10% faster than mod.
+            #
+            cell.neighbors = []
+            for neighbor in neighbors:
+                try:
+                    neighborRow = (cell.row + neighbor[0])
+                    neighborColumn = (cell.column + neighbor[1])
+                    cell.neighbors.append(self._cells[neighborRow][neighborColumn])
+                except:
+                    neighborRow = (cell.row + neighbor[0]) % self.rows
+                    neighborColumn = (cell.column + neighbor[1]) % self.columns
+                    cell.neighbors.append(self._cells[neighborRow][neighborColumn])
+
 
     def count_living(self):
         countLiving = 0
@@ -133,9 +230,9 @@ class Generation(object):
 
     def next_generation(self):
         #TODO See if deepcopy is faster than creating a new generation
-        nextGeneration = Generation(self.rows, self.columns)
+        nextGeneration = Generation(self.rows, self.columns, self.geometry, self.rules)
         for cell in self.cells():
-            if cell.next_state():
+            if cell.next_state(self.rules):
                 nextGeneration._cells[cell.row][cell.column].live()
         return nextGeneration
 

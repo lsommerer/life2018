@@ -20,11 +20,12 @@
      **                                                                                            **
      **     You can use the following commands:                                                    **
      **                                                                                            **
-     **          Population [P]: change the population rate: P[percent]                            **
+     **          Population [P]: change the population rate: P [percent]                           **
      **          Size       [I]: change the world size: I [rows columns]                           **
+     **          Geometry   [G]: toggle between a torus and dish topography: G                     **
+     **          Rules      [R]: change the rules (more help is available): R [live generate]      **
      **          More Help  [H]: this screen: H|?                                                  **
      **          Back       [B]: go back to the main menu                                          **
-     **                                                                                            **
      **                                                                                            **
      **                                                                                            **
      **                                                                                            **
