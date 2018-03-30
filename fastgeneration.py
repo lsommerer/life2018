@@ -123,18 +123,6 @@ class FastGeneration(Generation):
                 nextGeneration._cells[cell.row][cell.column].die()
         return nextGeneration
 
-    def next_generation2(self):
-        #DONE See if deepcopy is faster than creating a new generation
-        #     It is much, much slower.
-        nextGeneration = FastGeneration(self.rows, self.columns, self.geometry, self.rules)
-        newLivingCells = []
-        for cell in self.livingCells:
-            nextGeneration._cells[cell.row][cell.column].neighbors = cell.neighbors
-            if cell.next_state(self.rules):
-                nextGeneration._cells[cell.row][cell.column].live()
-            else:
-                nextGeneration._cells[cell.row][cell.column].die()
-        return nextGeneration
 
 
 
