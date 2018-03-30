@@ -6,7 +6,6 @@ class FastGeneration(Generation):
 
     def __init__(self, rows, columns, geometry='dish', rules=[[2,3],[3]]):
         super().__init__(rows, columns, geometry, rules)
-        self.livingCells = []
 
     def create_cells(self):
         self._cells = []
@@ -30,7 +29,6 @@ class FastGeneration(Generation):
         for _ in range(numberToLive):
             row, column = cellLocations.pop()
             self._cells[row][column].live()
-            self.livingCells.append((row, column))
 
     def assign_neighbors_dish(self):
         """
