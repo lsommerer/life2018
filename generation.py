@@ -14,6 +14,8 @@ class Generation(object):
         self.create_cells()
         self.geometry = geometry
         self.rules = rules
+
+    def assign_neighbors(self):
         if self.geometry == 'dish':
             self.assign_neighbors_dish()
         else:
@@ -231,6 +233,7 @@ class Generation(object):
     def next_generation(self):
         #TODO See if deepcopy is faster than creating a new generation
         nextGeneration = Generation(self.rows, self.columns, self.geometry, self.rules)
+        nextGeneration.assign_neighbors()
         for cell in self.cells():
             if cell.next_state(self.rules):
                 nextGeneration._cells[cell.row][cell.column].live()

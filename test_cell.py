@@ -34,6 +34,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_living_neighbors(self):
         g = Generation(5, 5)
+        g.assign_neighbors()
 
         cells = [[0, 1, 0, 0, 1],
                  [0, 0, 0, 1, 0],

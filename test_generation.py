@@ -7,6 +7,7 @@ class MyTestCase(unittest.TestCase):
         rows = 2
         columns = 4
         g = Generation(rows, columns)
+        g.assign_neighbors()
         #
         # Is the world the correct size?
         #
@@ -25,6 +26,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_str(self):
         g = Generation(2, 4)
+        g.assign_neighbors()
         l = Cell.liveChar
         d = Cell.deadChar
         #
@@ -50,6 +52,7 @@ class MyTestCase(unittest.TestCase):
         rows = 2
         columns = 4
         g = Generation(rows, columns)
+        g.assign_neighbors()
         self.assertEqual(len(g), rows * columns)
 
 
@@ -57,6 +60,7 @@ class MyTestCase(unittest.TestCase):
         rows = 2
         columns = 4
         g = Generation(rows, columns)
+        g.assign_neighbors()
         g._cells[0][0].live()
         self.assertEqual(g.count_living(), 1)
 
@@ -68,6 +72,7 @@ class MyTestCase(unittest.TestCase):
         rows = 3
         columns = 5
         g = Generation(rows, columns)
+        g.assign_neighbors()
         #
         # Why would you populate with zero% alive?
         #
@@ -189,6 +194,7 @@ class MyTestCase(unittest.TestCase):
                  n + d + d + d
 
         g = Generation(3, 3)
+        g.assign_neighbors()
         g._cells[0][1].live()
         g._cells[1][1].live()
         g._cells[2][1].live()
@@ -208,6 +214,7 @@ class MyTestCase(unittest.TestCase):
                  n + l + l
 
         g = Generation(2, 2)
+        g.assign_neighbors()
         g._cells[0][0].live()
         g._cells[0][1].live()
         g._cells[1][0].live()

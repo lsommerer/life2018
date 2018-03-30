@@ -37,6 +37,7 @@ class Simulation(object):
         self.geometry = geometry
         self.rules = [[2,3],[3]]
         self.generation = Generation(rows, columns, self.geometry)
+        self.generation.assign_neighbors()
         self.generation.populate_cells(percentAlive)
         self.mainMenu = Menu(Simulation.mainMenu)
         self.moreMenu = Menu(Simulation.moreMenu)
@@ -156,6 +157,7 @@ class Simulation(object):
         if size == None:
             size = [self.generation.rows, self.generation.columns]
         self.generation = Generation(size[0], size[1], self.geometry, self.rules)
+        self.generation.assign_neighbors()
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'a whole new world'
         self.name = 'untitled world'
@@ -203,6 +205,7 @@ class Simulation(object):
         if percentAlive == None:
             percentAlive = get_integer('What percent should be alive?')
         self.generation = Generation(self.generation.rows, self.generation.columns, self.geometry, self.rules)
+        self.generation.assign_neighbors()
         self.generation.populate_cells(percentAlive)
         self.initialPercentAlive = percentAlive
         self.message = 'world population changed'
@@ -223,6 +226,7 @@ class Simulation(object):
             rows = size[0]
             columns = size[1]
         self.generation = Generation(rows, columns, self.geometry, self.rules)
+        self.generation.assign_neighbors()
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'world size changed'
         self.generationCount = 0
@@ -321,6 +325,7 @@ class Simulation(object):
             rows = len(textGeneration)
             columns = len(textGeneration[0])
             self.generation = Generation(rows, columns, self.geometry, self.rules)
+            self.generation.assign_neighbors()
             for cell in self.generation.cells():
                 if textGeneration[cell.row][cell.column] != Generation.deadASCII:
                     cell.live()
@@ -400,7 +405,7 @@ class Simulation(object):
 
 def main():
     s = Simulation(115, 238) #115 238 on 4k monitor   84 156 on small screen 7pt font
-    s.intro()
+    #s.intro()
     s.run()
 
 def speed_test():
