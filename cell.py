@@ -1,6 +1,6 @@
 class Cell(object):
 
-    displayCharacters = 'squares'
+    displayCharacters = 'basic'
 
     if displayCharacters  == 'circles':
         liveChar = '\u26AB'

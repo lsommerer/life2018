@@ -33,6 +33,10 @@ class Simulation(object):
 
 
     def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish'):
+        """
+
+        :rtype: object
+        """
         self.initialPercentAlive = percentAlive
         self.geometry = geometry
         self.rules = [[2,3],[3]]
@@ -404,7 +408,7 @@ class Simulation(object):
 
 
 def main():
-    s = Simulation(115, 238) #115 238 on 4k monitor   84 156 on small screen 7pt font
+    s = Simulation(34, 72) #115 238 on 4k monitor   84 156 on small screen 7pt font
     #s.intro()
     s.run()
 
