@@ -1,12 +1,14 @@
 from generation import Generation
+from fastergeneration import FasterGeneration
+from fastergeneration import FasterGeneration
 from menu import Menu
-from toolbox import get_integer, get_string, get_boolean, is_integer
+from toolbox import get_integer, get_string, get_boolean
 from time import sleep
 from os import listdir, path, mkdir
 
 class Simulation(object):
 
-    delay = 0.0
+    delay = 0.1
     defaultDirectory = './worlds/'
     libraryDirectory = './library/'
 
@@ -32,7 +34,7 @@ class Simulation(object):
                 ['back',        '[B]ack',      'Bb',    None,      True]]
 
 
-    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish'):
+    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish', generationType=FasterGeneration):
         """
 
         :rtype: object
@@ -40,7 +42,8 @@ class Simulation(object):
         self.initialPercentAlive = percentAlive
         self.geometry = geometry
         self.rules = [[2,3],[3]]
-        self.generation = Generation(rows, columns, self.geometry)
+        self.generationType = generationType # Generation | FastGeneration | FasterGeneration
+        self.generation = self.generationType(rows, columns, self.geometry)
         self.generation.assign_neighbors()
         self.generation.populate_cells(percentAlive)
         self.mainMenu = Menu(Simulation.mainMenu)
@@ -60,7 +63,7 @@ class Simulation(object):
         bar += f'geometry:{self.geometry}  '
         bar += f'size:{self.generation.rows}x{self.generation.columns}  '
         bar += f'generations:{self.generationCount}  '
-        bar += f'living:{int(self.generation.count_living()/len(self.generation._cells)+1)}%  '
+        bar += f'living:{int(self.generation.count_living()/len(self.generation)*100)}%  '
         if self.message:
             bar += f'    *{self.message}*'
         return bar
@@ -160,7 +163,7 @@ class Simulation(object):
         """
         if size == None:
             size = [self.generation.rows, self.generation.columns]
-        self.generation = Generation(size[0], size[1], self.geometry, self.rules)
+        self.generation = self.generationType(size[0], size[1], self.geometry, self.rules)
         self.generation.assign_neighbors()
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'a whole new world'
@@ -208,7 +211,7 @@ class Simulation(object):
         """
         if percentAlive == None:
             percentAlive = get_integer('What percent should be alive?')
-        self.generation = Generation(self.generation.rows, self.generation.columns, self.geometry, self.rules)
+        self.generation = self.generationType(self.generation.rows, self.generation.columns, self.geometry, self.rules)
         self.generation.assign_neighbors()
         self.generation.populate_cells(percentAlive)
         self.initialPercentAlive = percentAlive
@@ -229,7 +232,7 @@ class Simulation(object):
         else:
             rows = size[0]
             columns = size[1]
-        self.generation = Generation(rows, columns, self.geometry, self.rules)
+        self.generation = self.generationType(rows, columns, self.geometry, self.rules)
         self.generation.assign_neighbors()
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'world size changed'
@@ -328,10 +331,10 @@ class Simulation(object):
             textGeneration = textGeneration.split('\n')[1:]
             rows = len(textGeneration)
             columns = len(textGeneration[0])
-            self.generation = Generation(rows, columns, self.geometry, self.rules)
+            self.generation = self.generationType(rows, columns, self.geometry, self.rules)
             self.generation.assign_neighbors()
             for cell in self.generation.cells():
-                if textGeneration[cell.row][cell.column] != Generation.deadASCII:
+                if textGeneration[cell.row][cell.column] != self.generationType.deadASCII:
                     cell.live()
             if self.geometry == 'dish':
                 self.generation.assign_neighbors_torus()
@@ -384,12 +387,11 @@ class Simulation(object):
     def toggle_geometry(self):
         if self.geometry == 'dish':
             self.geometry = 'torus'
-            self.generation.assign_neighbors_torus()
             self.message = 'The world wraps around like a donut.'
         else:
             self.geometry = 'dish'
-            self.generation.assign_neighbors_dish()
             self.message = 'The world ends at the edges.'
+            self.generation.assign_neighbors()
         print(self)
 
     def help(self, filename):

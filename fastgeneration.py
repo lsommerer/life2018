@@ -1,9 +1,21 @@
-from fastcell import FastCell
+from cell import Cell
 from generation import Generation
 from random import shuffle
 
 class FastGeneration(Generation):
+    """
+    It is VERY expensive to assign neighbors each time you create a new generation. So this version
+    of Generation doesn't do that. It just copies the neighbors from the previous generation, because
+    the neighbors don't change unless the geometry of the workd changes (in which case we do recompute
+    the neighbors).
 
+    Unfortunately, this means that we can no longer have the list of neighbors be a list of the
+    actual cells, because the cells would be from the previous generation. So now the list of neighbors
+    is just a list of the row and column that you can use to lookup the neighbor in the list of cells.
+
+    This approach reduced the time to run the simulation by over 40 percent; nearly cutting the
+    run time in half. The improvement is especially noticeable with larger worlds.
+    """
     def __init__(self, rows, columns, geometry='dish', rules=[[2,3],[3]]):
         super().__init__(rows, columns, geometry, rules)
 
@@ -13,22 +25,6 @@ class FastGeneration(Generation):
             self._cells.append([])
             for column in range(self.columns):
                 self._cells[row].append(FastCell(row, column, self))
-
-    def populate_cells(self, percentAlive=30):
-        """
-        Populate cells by creating a list of all possible cells, shuffling that list, and
-        picking the first X cells from the list to change to alive. X is the percentAlive
-        argument times the total number of cells in the generation.
-
-        :param percentAlive: Percentage of cells in this generation that will be changed to alive.
-        :return:
-        """
-        cellLocations = [(cell.row, cell.column) for cell in self.cells()]
-        shuffle(cellLocations)
-        numberToLive = int( len(self) * (percentAlive/100) )
-        for _ in range(numberToLive):
-            row, column = cellLocations.pop()
-            self._cells[row][column].live()
 
     def assign_neighbors_dish(self):
         """
@@ -108,10 +104,7 @@ class FastGeneration(Generation):
                 neighborColumn = (cell.column + neighbor[1]) % self.columns
                 cell.neighbors.append((neighborRow, neighborColumn))
 
-
     def next_generation(self):
-        #DONE See if deepcopy is faster than creating a new generation
-        #     It is much, much slower.
         nextGeneration = FastGeneration(self.rows, self.columns, self.geometry, self.rules)
         for cell in self.cells():
             nextGeneration._cells[cell.row][cell.column].neighbors = cell.neighbors
@@ -123,6 +116,25 @@ class FastGeneration(Generation):
 
 
 
+class FastCell(Cell):
+    """
+    A slight variation on the Cell class. Although it is very eligant for the cell to contain a list of
+    all of its neighbors, It was really slowing things down, so in FastGeneration the cell has a list which
+    contains the row and column of all of its neighbors. FastGeneration has a list of all of the cells and
+    and FastCells has to have a reference to the generation to look those up.
+    """
+
+    def __init__(self, row, column, generation):
+        super().__init__(row, column)
+        self.generation = generation
+
+    def living_neighbors(self):
+        """Returns the number of living neighbors a cell has."""
+        livingNeighbors = 0
+        for neighbor in self.neighbors:
+            if self.generation._cells[neighbor[0]][neighbor[1]].alive:
+                livingNeighbors += 1
+        return livingNeighbors
 
 
 

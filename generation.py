@@ -44,6 +44,12 @@ class Generation(object):
             for cell in row:
                 yield cell
 
+    def assign_neighbors(self):
+        if self.geometry == 'dish':
+            self.assign_neighbors_dish()
+        else:
+            self.assign_neighbors_torus()
+
     def assign_neighbors_dish(self):
         """
         Each cell has a list of all of it's neighbors. This is complicated by the fact that
@@ -232,6 +238,7 @@ class Generation(object):
 
     def next_generation(self):
         #TODO See if deepcopy is faster than creating a new generation
+        #DONE It is sooo much slower.
         nextGeneration = Generation(self.rows, self.columns, self.geometry, self.rules)
         nextGeneration.assign_neighbors()
         for cell in self.cells():
