@@ -32,6 +32,12 @@ class Generation(object):
     def __len__(self):
         return self.rows * self.columns
 
+    def get_generation(self):
+        return self._cells
+
+    def set_generation(self, cells):
+        self._cells = cells
+
     def create_cells(self):
         self._cells = []
         for row in range(self.rows):

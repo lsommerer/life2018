@@ -70,6 +70,12 @@ class FasterGeneration(Generation):
             string += ''.join([cell for cell in row])
         return string
 
+    def get_generation(self):
+        return self.livingCells
+
+    def set_generation(self, livingCells):
+        self.livingCells = livingCells
+
     def create_cells(self):
         self._cells = []
         for row in range(self.rows):

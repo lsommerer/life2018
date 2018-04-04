@@ -15,6 +15,8 @@ class Simulation(object):
     mainMenu = [['create',      '[C]reate',    'Cc',   'integer2', False],
                 ['next',        '[N]ext',      'Nn',   'integer1', True],
                 ['skip',        's[K]ip',      'Kk',   'integer1', False],
+                ['previous',    'pr[E]vious',  'Ee',   'integer1', False],
+                ['skip back',   'skip [B]ack', 'Bb',   'integer1', False],
                 ['save',        '[S]ave',      'Ss',   'string1',  False],
                 ['open',        '[O]pen',      'Oo',   'string1',  False],
                 ['library',     '[L]ibrary',   'Ll',   'string1',  False],
@@ -23,7 +25,7 @@ class Simulation(object):
                 ['quit',        '[Q]uit',      'Qq',    None,      False],
                 ['population',  '',            'Pp',   'integer1', False],
                 ['geometry',    '',            'Gg',    None,      False],
-                ['rule change', '',            'Rr',   'integer2',  False],
+                ['rule change', '',            'Rr',   'integer2', False],
                 ['size',        '',            'Ii',   'integer2', False]]
 
     moreMenu = [['population',  '[P]opulaion', 'Pp',   'integer1', False],
@@ -34,7 +36,7 @@ class Simulation(object):
                 ['back',        '[B]ack',      'Bb',    None,      True]]
 
 
-    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish', generationType=FasterGeneration):
+    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish', generationType=Generation):
         """
 
         :rtype: object
@@ -52,6 +54,7 @@ class Simulation(object):
         self.percentAlive = percentAlive
         self.name = 'untitled world'
         self.message = 'Welcome to LIFE!'
+        self.timeLine = []
 
     def __str__(self):
         return str(self.generation) + self.status_bar()
@@ -108,6 +111,10 @@ class Simulation(object):
                 self.next(parameter)
             elif command == 'skip':
                 self.skip_forward(parameter)
+            elif command == 'previous':
+                self.previous(parameter)
+            elif command == 'skip back':
+                self.skip_back(parameter)
             elif command == 'save':
                 self.save(parameter, Simulation.defaultDirectory)
             elif command == 'open':
@@ -168,6 +175,8 @@ class Simulation(object):
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'a whole new world'
         self.name = 'untitled world'
+        self.generationCount = 0
+        self.timeLine = []
         print(self)
 
     def next(self, generations=None):
@@ -184,6 +193,26 @@ class Simulation(object):
             print(self)
             sleep(Simulation.delay)
             self.generationCount += 1
+            self.timeLine.append(self.generation.get_generation())
+            self.message = f' left: {start - current} '
+        self.message = ''
+        print(self)
+
+    def previous(self, generations=None):
+        """
+        Pop the last generation off of the timeline if it is available and make it the
+        current world.
+        :param generations: [optional] How many generations to go back.
+        :return:
+        """
+        if generations == None:
+            generations = 1
+        start = generations-1
+        for current in range(generations):
+            self.generation.set_generation(self.timeLine.pop())
+            print(self)
+            sleep(Simulation.delay)
+            self.generationCount -= 1
             self.message = f' left: {start - current} '
         self.message = ''
         print(self)
@@ -199,6 +228,7 @@ class Simulation(object):
             generations = get_integer('How many generations?')
         for _ in range(generations):
             self.generation = self.generation.next_generation()
+            self.timeLine.append(self.generation.get_generation())
         self.message = f'skipped forward {generations} generations'
         self.generationCount += generations
         print(self)
@@ -217,6 +247,7 @@ class Simulation(object):
         self.initialPercentAlive = percentAlive
         self.message = 'world population changed'
         self.generationCount = 0
+        self.timeLine = []
         print(self)
 
     def change_world_size(self, size=None):
@@ -237,6 +268,7 @@ class Simulation(object):
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'world size changed'
         self.generationCount = 0
+        self.timeLine = []
         print(self)
 
     def rule_change(self, newRules=None):
@@ -343,6 +375,7 @@ class Simulation(object):
             self.name = filename.split('.')[1].split('/')[2]
             self.message = f'opened {self.name}'
             self.generationCount = 0
+            self.timeLine = []
             print(self)
 
     def get_filename_for_opening(self, filename, myPath='./'):
