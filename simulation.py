@@ -1,5 +1,5 @@
 from generation import Generation
-from fastergeneration import FasterGeneration
+from fastgeneration import FastGeneration
 from fastergeneration import FasterGeneration
 from menu import Menu
 from toolbox import get_integer, get_string, get_boolean
@@ -8,7 +8,7 @@ from os import listdir, path, mkdir
 
 class Simulation(object):
 
-    delay = 0.1
+    delay = 0.0
     defaultDirectory = './worlds/'
     libraryDirectory = './library/'
 
@@ -36,7 +36,7 @@ class Simulation(object):
                 ['back',        '[B]ack',      'Bb',    None,      True]]
 
 
-    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish', generationType=Generation):
+    def __init__(self, rows=34, columns=72, percentAlive=50, geometry='dish', generationType=FasterGeneration):
         """
 
         :rtype: object
@@ -50,7 +50,7 @@ class Simulation(object):
         self.generation.populate_cells(percentAlive)
         self.mainMenu = Menu(Simulation.mainMenu)
         self.moreMenu = Menu(Simulation.moreMenu)
-        self.generationCount = 0
+        self.generationCount = 1
         self.percentAlive = percentAlive
         self.name = 'untitled world'
         self.message = 'Welcome to LIFE!'
@@ -96,10 +96,10 @@ class Simulation(object):
         self.next(24)
         sleep(1)
         Simulation.delay = temp
-        self.help('help.txt')
 
     def run(self):
         """Main event loop for the simulation."""
+        self.help('help.txt')
         command = 'do not quite the first time'
         while command != 'quit':
             self.mainMenu.display()
@@ -175,7 +175,7 @@ class Simulation(object):
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'a whole new world'
         self.name = 'untitled world'
-        self.generationCount = 0
+        self.generationCount = 1
         self.timeLine = []
         print(self)
 
@@ -189,12 +189,12 @@ class Simulation(object):
             generations = 1
         start = generations-1
         for current in range(generations):
+            self.timeLine.append(self.generation.get_generation())
             self.generation = self.generation.next_generation()
+            self.generationCount += 1
+            self.message = f' left: {start - current} '
             print(self)
             sleep(Simulation.delay)
-            self.generationCount += 1
-            self.timeLine.append(self.generation.get_generation())
-            self.message = f' left: {start - current} '
         self.message = ''
         print(self)
 
@@ -207,15 +207,20 @@ class Simulation(object):
         """
         if generations == None:
             generations = 1
-        start = generations-1
-        for current in range(generations):
-            self.generation.set_generation(self.timeLine.pop())
+        if generations > len(self.timeLine):
+            generations = len(self.timeLine)
+        start = generations - 1
+        if generations:
+            for current in range(generations):
+                self.generation.set_generation(self.timeLine.pop())
+                self.generationCount -= 1
+                self.message = f' left: {start - current} '
+                print(self)
+                sleep(Simulation.delay)
+            self.message = ''
+        else:
+            self.message = 'No previous generations exist.'
             print(self)
-            sleep(Simulation.delay)
-            self.generationCount -= 1
-            self.message = f' left: {start - current} '
-        self.message = ''
-        print(self)
 
     def skip_forward(self, generations=None):
         """
@@ -227,8 +232,8 @@ class Simulation(object):
         if generations == None:
             generations = get_integer('How many generations?')
         for _ in range(generations):
-            self.generation = self.generation.next_generation()
             self.timeLine.append(self.generation.get_generation())
+            self.generation = self.generation.next_generation()
         self.message = f'skipped forward {generations} generations'
         self.generationCount += generations
         print(self)
@@ -246,7 +251,7 @@ class Simulation(object):
         self.generation.populate_cells(percentAlive)
         self.initialPercentAlive = percentAlive
         self.message = 'world population changed'
-        self.generationCount = 0
+        self.generationCount = 1
         self.timeLine = []
         print(self)
 
@@ -267,7 +272,7 @@ class Simulation(object):
         self.generation.assign_neighbors()
         self.generation.populate_cells(self.initialPercentAlive)
         self.message = 'world size changed'
-        self.generationCount = 0
+        self.generationCount = 1
         self.timeLine = []
         print(self)
 
@@ -366,15 +371,23 @@ class Simulation(object):
             self.generation = self.generationType(rows, columns, self.geometry, self.rules)
             self.generation.assign_neighbors()
             for cell in self.generation.cells():
-                if textGeneration[cell.row][cell.column] != self.generationType.deadASCII:
-                    cell.live()
-            if self.geometry == 'dish':
-                self.generation.assign_neighbors_torus()
-            else:
-                self.generation.assign_neighbors_dish()
+                #TODO move this to the objects
+                # Checking which type is the wrong thing to do. Each of these types should supply a method
+                # that does the right thing.
+                #
+                if type(self.generation) is Generation:
+                    if textGeneration[cell.row][cell.column] != self.generationType.deadASCII:
+                        cell.live()
+                elif type(self.generation) is FasterGeneration:
+                    if textGeneration[cell[0]][cell[1]] != self.generationType.deadASCII:
+                        self.generation.livingCells.append((cell[0],cell[1]))
+                elif type(self.generation) is FastGeneration:
+                    raise TypeError('FastGeneration open not implemented yet')
+            if type(self.generation) is FasterGeneration:
+                self.generation.livingCells = frozenset(self.generation.livingCells)
             self.name = filename.split('.')[1].split('/')[2]
             self.message = f'opened {self.name}'
-            self.generationCount = 0
+            self.generationCount = 1
             self.timeLine = []
             print(self)
 
