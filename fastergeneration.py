@@ -76,6 +76,14 @@ class FasterGeneration(Generation):
     def set_generation(self, livingCells):
         self.livingCells = livingCells
 
+    def is_stable(self, timeLine, generationsToCheck = 3):
+        isStable = False
+        if len(timeLine) >= generationsToCheck:
+            for generation in range(1, generationsToCheck + 1):
+                if timeLine[len(timeLine) - generation] == self.livingCells:
+                    isStable = True
+        return isStable
+
     def create_cells(self):
         self._cells = []
         for row in range(self.rows):

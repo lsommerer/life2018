@@ -50,6 +50,14 @@ class Generation(object):
             for cell in row:
                 yield cell
 
+    def is_stable(self, timeLine, generationsToCheck = 3):
+        isStable = False
+        if len(timeLine) >= generationsToCheck:
+            for generation in range(1, generationsToCheck + 1):
+                if timeLine[len(timeLine) - generation] == self._cells:
+                    isStable = True
+        return isStable
+
     def assign_neighbors(self):
         if self.geometry == 'dish':
             self.assign_neighbors_dish()

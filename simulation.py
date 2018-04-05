@@ -2,13 +2,13 @@ from generation import Generation
 from fastgeneration import FastGeneration
 from fastergeneration import FasterGeneration
 from menu import Menu
-from toolbox import get_integer, get_string, get_boolean
+from toolbox import get_integer, get_string, get_boolean, get_integer_between
 from time import sleep
 from os import listdir, path, mkdir
 
 class Simulation(object):
 
-    delay = 0.0
+    delayList = [5, 3, 2, 1.5, 1, 0.75, 0.5, 0.25, 0.1, 0.05, 0]
     defaultDirectory = './worlds/'
     libraryDirectory = './library/'
 
@@ -32,6 +32,7 @@ class Simulation(object):
                 ['size',        's[I]ze',      'Ii',   'integer2', False],
                 ['geometry',    '[G]eometry',  'Gg',    None,      False],
                 ['rule change', '[R]ules',     'Rr',   'integer2',  False],
+                ['speed',       '[S]peed',     'Ss',   'integer1',  False],
                 ['more help',   '[H]elp',      'Hh?',   None,      False],
                 ['back',        '[B]ack',      'Bb',    None,      True]]
 
@@ -55,6 +56,7 @@ class Simulation(object):
         self.name = 'untitled world'
         self.message = 'Welcome to LIFE!'
         self.timeLine = []
+        self.delay = Simulation.delayList[5]
 
     def __str__(self):
         return str(self.generation) + self.status_bar()
@@ -85,17 +87,17 @@ class Simulation(object):
     def intro(self):
         self.open('intro.life', './library')
         sleep(1)
-        temp = Simulation.delay
-        Simulation.delay = 1.6
+        temp = self.delay
+        self.delay = 1.6
         self.next(2)
-        Simulation.delay = 0.8
+        self.delay = 0.8
         self.next(4)
-        Simulation.delay = 0.4
+        self.delay = 0.4
         self.next(8)
-        Simulation.delay = 0.2
+        self.delay = 0.2
         self.next(24)
         sleep(1)
-        Simulation.delay = temp
+        self.delay = temp
 
     def run(self):
         """Main event loop for the simulation."""
@@ -114,7 +116,7 @@ class Simulation(object):
             elif command == 'previous':
                 self.previous(parameter)
             elif command == 'skip back':
-                self.skip_back(parameter)
+                self.skip_backwards(parameter)
             elif command == 'save':
                 self.save(parameter, Simulation.defaultDirectory)
             elif command == 'open':
@@ -157,6 +159,8 @@ class Simulation(object):
             self.toggle_geometry()
         elif command == 'size':
             self.change_world_size(parameter)
+        elif command == 'speed':
+            self.change_speed(parameter)
         elif command == 'rule change':
             self.rule_change(parameter)
         else:
@@ -179,6 +183,9 @@ class Simulation(object):
         self.timeLine = []
         print(self)
 
+    def is_stable(self):
+        return self.generation.is_stable(self.timeLine)
+
     def next(self, generations=None):
         """
         Generate and display the next generation of cells.
@@ -188,14 +195,21 @@ class Simulation(object):
         if generations == None:
             generations = 1
         start = generations-1
-        for current in range(generations):
+        current = 0
+        stable = False
+        while (current < generations) and not stable:
             self.timeLine.append(self.generation.get_generation())
             self.generation = self.generation.next_generation()
             self.generationCount += 1
             self.message = f' left: {start - current} '
             print(self)
-            sleep(Simulation.delay)
-        self.message = ''
+            sleep(self.delay)
+            stable = self.is_stable()
+            current += 1
+        if stable:
+            self.message = 'Reached a stable position'
+        else:
+            self.message = ''
         print(self)
 
     def previous(self, generations=None):
@@ -216,7 +230,7 @@ class Simulation(object):
                 self.generationCount -= 1
                 self.message = f' left: {start - current} '
                 print(self)
-                sleep(Simulation.delay)
+                sleep(self.delay)
             self.message = ''
         else:
             self.message = 'No previous generations exist.'
@@ -231,11 +245,37 @@ class Simulation(object):
         """
         if generations == None:
             generations = get_integer('How many generations?')
-        for _ in range(generations):
+        stable = False
+        current = 0
+        while (current < generations) and not stable:
             self.timeLine.append(self.generation.get_generation())
             self.generation = self.generation.next_generation()
-        self.message = f'skipped forward {generations} generations'
-        self.generationCount += generations
+            current += 1
+            stable = self.is_stable()
+        self.message = f'skipped forward {current} '
+        if stable:
+            self.message += '[stable position reached]'
+        self.generationCount += current
+        print(self)
+
+    def skip_backwards(self, generations=None):
+        """
+        Loop through the number of generations specified without displaying the
+        intermediate generations.
+        :param generations: [optional] number of generations to skip
+        :return: None
+        """
+        if generations == None:
+            generations = get_integer('How many generations?')
+        if generations > len(self.timeLine):
+            generations = len(self.timeLine)
+        if generations:
+            for _ in range(generations):
+                self.generation.set_generation(self.timeLine.pop())
+                self.generationCount -= 1
+            self.message = f'skipped backwards {generations} generations'
+        else:
+            self.message = 'No previous generations exist.'
         print(self)
 
     def change_population_rate(self, percentAlive=None):
@@ -253,6 +293,18 @@ class Simulation(object):
         self.message = 'world population changed'
         self.generationCount = 1
         self.timeLine = []
+        print(self)
+
+    def change_speed(self, speed=None):
+        """
+        Create a new world with the given percent of cells alive.
+        :param percentAlive: [optiona] Number of living cells out of total cells.
+        :return: None
+        """
+        if (speed is None) or (speed not in [0,1,2,3,4,5,6,7,8,9,10]):
+            speed = get_integer_between(0, 10, 'What speed?')
+        self.delay = Simulation.delayList[speed]
+        self.message = f'speed set to {speed}'
         print(self)
 
     def change_world_size(self, size=None):
@@ -371,9 +423,14 @@ class Simulation(object):
             self.generation = self.generationType(rows, columns, self.geometry, self.rules)
             self.generation.assign_neighbors()
             for cell in self.generation.cells():
-                #TODO move this to the objects
-                # Checking which type is the wrong thing to do. Each of these types should supply a method
-                # that does the right thing.
+                #
+                # Having multiple types of Generations makes this annoyingly complicated. I should
+                # really rewrite this so that each type of Generation has a procedure that turns
+                # a cell in the row, column coordinates alive. That would let me replace the 10
+                # lines with something like:
+                #
+                # if textGeneration[cell.row][cell.column] != self.generationType.deadASCII:
+                #    self.generation.live(row, column)
                 #
                 if type(self.generation) is Generation:
                     if textGeneration[cell.row][cell.column] != self.generationType.deadASCII:
@@ -385,6 +442,10 @@ class Simulation(object):
                     raise TypeError('FastGeneration open not implemented yet')
             if type(self.generation) is FasterGeneration:
                 self.generation.livingCells = frozenset(self.generation.livingCells)
+            #
+            # Marking the end of the section that could be replaced by moving functionality into
+            # the Generatin objects.
+            #
             self.name = filename.split('.')[1].split('/')[2]
             self.message = f'opened {self.name}'
             self.generationCount = 1
